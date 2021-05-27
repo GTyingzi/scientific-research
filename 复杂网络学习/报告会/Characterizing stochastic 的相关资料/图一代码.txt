@@ -1,0 +1,50 @@
+clear;clc
+data=[8 1 6 4 2 3 7 0 5];
+d=2;
+[x0,y0]=fc(data,d);   %x0获取π模式，y0获取π模式转移矩阵
+h_i=f_hi_1(y0);
+H_GN=sum(y0)*h_i;
+
+
+%输入时间序列以及维数，返回π模式及对应的π模式转移矩阵
+function [x,y]=fc(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end
+
+%输入π模式转移概率矩阵，得到局部节点熵
+function h=f_hi_1(y)
+[m n]=size(y);
+p=y./sum(y,2);
+h=zeros(m,1);
+for i=1:m
+    for j=1:n
+        if y(i,j)~=0
+            h(i)=h(i)-p(i,j)*log2(p(i,j));
+        end
+    end
+end
+end

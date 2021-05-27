@@ -1,0 +1,99 @@
+<html><head><title>boxdim_listepoints (FRACLAB Functions)</title>
+<!-- $Revision$  $Date$ -->
+
+<!-- DOCNAME:FRACLAB Functions -->
+<!-- CHUNKNAME: boxdim_listepoints -->
+<!-- CHAPNAME: max -->
+<!-- HEADSTUFF -->
+
+<link rel=stylesheet href="docstyle1.css" type="text/css">
+</head>
+<body bgcolor=#ffffff>
+<a name="998383">
+<!-- NAVBARTOP -->
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline bgcolor="#e7ebf7"><b>FRACLAB Functions</b></td>
+<td valign=baseline bgcolor="#e7ebf7" align=right><a href="P_revious"><img src="b_prev.gif" alt="Previous page" border=0></a>&nbsp;&nbsp;&nbsp;<a href="N_ext"><img src="b_next.gif" alt="Next Page" border=0></a></td>
+</tr>
+</table><font size=+3 color="#990000">boxdim_listepoints</font>
+<p>
+Box dimension of a set of points computed with the box method.</p>
+<a name="syntax"></a><p><font size=+1 color="#990000"><b>Syntax</b></font><br class="hdr">
+<code> [boxdim,Nboxes,handlefig]=boxdim_listepoints(PointsList, Size, Ratio, Waitbar, reg, lrstr, optvarargin)</code>
+<a name="inputs"></a><p><font size=+1 color="#990000"><b>Inputs</b></font><br class="hdr">
+<p><b><code>PointsList</code></b> : 
+<br>PointsList  :  N x M matrix. Set of points which box dimension is to be computated. Each line corresponds to a point, each column corresponds to a coordinate. N is the number of points. M is the number of coordinates (the dimension of the space). For example, if the points lie in an plane, M=2.
+</p>
+<p><b><code>Size, Ratio</code> : </b>
+<br>Ratio defines the lengths of the sides of the reference box. It is a 1xM array. The successive boxes will be deduced from this first box by homotheties with ration Size(i). More precisely, the box at at the i - th iteration will have a length along the k - th axis equal to Ratio(k)*Size(i)
+For a graphical explanation about Size and Ratio, see <a href="#example1">Example 1</a></p>
+<p><b><code>Waitbar</code> : </b><br>1 if you want a waitbar to appear during the calculation, else 0</p>
+<p><b><code>reg</code> :</b><br> The way you choose the bounds. See the help on fl_regression for more information.</p>
+<p><b><code>lrstr,optvarargin</code> :</b><br> Regression parameters. They define the regression type. Type " help monolr" for more information</p>
+<a name="outputs"></a><p><font size=+1 color="#990000"><b>Outputs</b></font><br class="hdr">
+<p><b><code>boxdim</code> :</b><br> The estimated box dimension</p>
+<p><b><code>Nboxes</code> :</b><br> Nboxes is a vector. Nboxes(i) is the number of non-empty boxes at the i - th iteration. A non-empty box is a box that contains at least one point of the graph of the function.</p>
+<p><b><code>handlefig</code> :</b><br> If reg~=0, a window appears to help you choosing the linearity bounds. handlefig is the handle of this figure.</p>
+<p><b><code>bounds</code> :</b><br> Bounds of linearity of log2(Nboxes) in function of log2(Size). Interesting if reg==1.</p>
+<a name="optional"></a><p><font size=+1 color="#990000"><b>Optional arguments</b></font><br class="hdr">
+</p>
+All arguments except PointsList are optional.
+For example, the syntax : boxdim_classique(PointsList) is correct.
+If you don't want to precise an argument, you can also type [].
+The missing arguments take their default values:
+</p><p><code>
+Size=[1 1/2 1/4 ... 1/2048 1/4096]<br>
+Ratio =[1 1 ...]<br>
+Waitbar = 0<br>
+reg=0<br>
+lrstr='ls'<br></code></p><p>
+These default values are not always relevant, especially Size, 
+so when you don't know how to define Size, try to use reg ~= 0 in order to precise 
+manually the correct box sizes.
+</p> 
+<a name="examples"></a><p><font size=+1 color="#990000"><b>Examples</b></font><br class="hdr">
+<a name="example1"></a><p><b>Example 1</b></p>
+<p>This drawing may help you to understand the roles of Size and Ratio.</p>
+<p><center><img src="expl_boxdim_listepoints.png"></center>
+It corresponds to the following intructions :<br>
+</p><p><code>
+y=GeneWei(4096,0.6)+2;<br>
+x=[0:4095]'/4096;<br>
+PointsList=[x,y];<br>
+Size=[1/2,1/4];<br>
+Ratio=[1,4];<br>
+[boxdim,Nboxes,handlefig]=boxdim_listepoints(PointsList, Size, Ratio)<br>
+</code></p>
+These instructions will return Nboxes=[4,10]. It is consistent with the drawing. 
+The computed dimension isn't meaningfull, because of the low number of iterations. The goal of this example is just to show how the boxes are defined.
+<p><a name="example2"></a><b>Example 2</b></p>
+<p>Example: Computes the box dimension of a self-similar set of points. Its theorical dimension is log(5)/log(3)=1.46</p>
+<code>
+% load the list of points<br>
+load('fusee.mat');<br>
+% Plot the list of points<br>
+figure;plot(fusee(:,1),fusee(:,2),'.');<br>
+% Compute its box dimension<br>
+reg=1;<br>
+Waitbar=1;<br>
+[boxdim,Ntailles,handlefig,bounds]=boxdim_listepoints(fusee,[],[],Waitbar,reg);<br>
+boxdim<br>
+bounds<br>
+
+% You should find bounds = -6 -2. This means that<br>
+% the progression is linear when log2(size) is in [-6 -2]. You may keep these<br>
+% bounds, take more points and try another regression type.<br>
+reg=0;<br>
+Size=2.^[-6 : 0.5 : -2];<br>
+boxdim=boxdim_listepoints(fusee,Size,[],Waitbar,reg,'pls',30);<br>
+boxdim.<br>
+</code>
+</p>
+<p><font size=+1 color="#990000"><b>See Also</b></font><br class="hdr">
+<p><code><a href="boxdim_classique.html">boxdim_classique</a></code>, 
+<code><a href="boxdim_binaire.html">boxdim_binaire</a></code>, 
+<code><a href="fl_regression.html">fl_regression</a></code>, 
+<code><a href="normalize_list.html">normalize_list</a></code>
+</p>
+</body>
+</html>

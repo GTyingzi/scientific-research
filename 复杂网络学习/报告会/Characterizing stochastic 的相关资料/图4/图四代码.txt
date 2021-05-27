@@ -1,0 +1,75 @@
+clear;clc
+
+d_3=3;d_4=4;d_5=5;  %取3,4,5三个嵌入维度，注：维度过高，跑的次数太久了，这里就取三个嵌入维度观察性质
+k=3;
+qs_3=zeros(1,10^k/10);qs_4=zeros(1,10^k/10);qs_5=zeros(1,10^k/10);
+qs_pl_3=zeros(1,10^k/10);qs_pl_4=zeros(1,10^k/10);qs_pl_5=zeros(1,10^k/10);
+for kk=1:10
+
+for N=10:10:10^k
+data=rand(1,N);
+%获取π模式和π模式转移矩阵
+[x_3,y_3]=fc(data,d_3);    %从data获取π模式，y0获取π模式转移矩阵
+[x_4,y_4]=fc(data,d_4);
+[x_5,y_5]=fc(data,d_5);
+
+i=N/10;
+%π序数模式的缺失比例
+qs_3(i)=1-length(unique(x_3))/factorial(d_3);
+qs_4(i)=1-length(unique(x_4))/factorial(d_4);
+qs_5(i)=1-length(unique(x_5))/factorial(d_5);
+%π转移的缺失比例
+qs_pl_3(i)=1-sum(sum(y_3~=0))/(d_3*factorial(d_3));
+qs_pl_4(i)=1-sum(sum(y_4~=0))/(d_4*factorial(d_4));
+qs_pl_5(i)=1-sum(sum(y_5~=0))/(d_5*factorial(d_5));
+end
+
+M=10:10:10^k;
+figure(1)
+title(['迭代第:' num2str(kk) '次']);
+xlabel('Time series length,N');
+ylabel('Fraction of missing permutations');
+semilogx(M,qs_3,'r');hold on;
+semilogx(M,qs_4,'g');hold on;
+semilogx(M,qs_5,'b');hold on;
+
+
+figure(2)
+title(['迭代第:' num2str(kk) '次']);
+xlabel('Time series length,N');
+ylabel('Fraction of missing transitions');
+semilogx(M,qs_pl_3,'r');hold on;
+semilogx(M,qs_pl_4,'g');hold on;
+semilogx(M,qs_pl_5,'b');hold on;
+
+end
+
+
+%输入时间序列以及维数，返回π模式及对应的π模式转移矩阵
+function [x,y]=fc(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end   

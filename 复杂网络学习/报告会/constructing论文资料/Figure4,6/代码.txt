@@ -1,0 +1,215 @@
+%%混Rossler系统-公式,四阶Runge Kutta方法
+%初始数据
+clear;clc
+tic
+global w         %%定义全局变量w
+global a;        %%定义全局变量a
+N=20000;h=0.01;  %%迭代N次，步长h；
+w=1.0;a=0.26;   %%设定w,a
+x=zeros(1,N);y=zeros(1,N);z=zeros(1,N);   %%提前分配内存空间
+x(1)=0;y(1)=8;z(1)=0.5;  %%设定初始点
+
+%四阶Runge-Kutta算法
+for i=1:N
+    x_k1=f_dx(y(i),z(i));       %%调用自编写f_dx函数
+    y_k1=f_dy(x(i),y(i));       %%调用自编写f_dy函数
+    z_k1=f_dz(x(i),z(i));       %%调用自编写f_dz函数
+    
+    x_k2=f_dx(y(i)+h/2*y_k1,z(i)+h/2*z_k1);
+    y_k2=f_dy(x(i)+h/2*x_k1,y(i)+h/2*y_k1);
+    z_k2=f_dz(x(i)+h/2*x_k1,z(i)+h/2*z_k1);
+    
+    x_k3=f_dx(y(i)+h/2*y_k2,z(i)+h/2*z_k2);
+    y_k3=f_dy(x(i)+h/2*x_k2,y(i)+h/2*y_k2);
+    z_k3=f_dz(x(i)+h/2*x_k1,z(i)+h/2*z_k2);
+    
+    x_k4=f_dx(y(i)+h*y_k3,z(i)+h*z_k3);
+    y_k4=f_dy(x(i)+h*x_k3,y(i)+h*y_k3);
+    z_k4=f_dz(x(i)+h*x_k3,z(i)+h*z_k3);
+    
+    x(i+1)=x(i)+h/6*(x_k1+2*x_k2+2*x_k3+x_k4);
+    y(i+1)=y(i)+h/6*(y_k1+2*y_k2+2*y_k3+y_k4);
+    z(i+1)=z(i)+h/6*(z_k1+2*z_k2+2*z_k3+z_k4);
+end
+
+%获得x,y,z序列后进行差分
+delta_x=diff(x);      %%对余下的x序列进行差分       
+delta_y=diff(y);      %%对余下的y序列进行差分
+delta_z=diff(z);      %%对余下的z序列进行差分
+m=length(delta_x);    %%获取余下的x序列长度
+
+%记录π序数
+pai_xushu=cell(1,m);        %%直观显示对应的π模式
+digit_xushu=zeros(1,m);     %%编程序简易，以1->π1,2->π2，…，n->πn
+for i=1:m                   %%得到m个π序数
+    if delta_x(i)>=0 && delta_y(i)>=0 && delta_z(i)>=0
+        pai_xushu{i}='π1';
+        digit_xushu(i)=1;
+    elseif delta_x(i)>=0 && delta_y(i)>=0 && delta_z(i)<0
+        pai_xushu{i}='π2';
+        digit_xushu(i)=2;
+    elseif delta_x(i)>=0 && delta_y(i)<0 && delta_z(i)>=0
+        pai_xushu{i}='π3';
+        digit_xushu(i)=3;
+    elseif delta_x(i)>=0 && delta_y(i)<0 && delta_z(i)<0
+        pai_xushu{i}='π4';
+        digit_xushu(i)=4;
+    elseif delta_x(i)<0 && delta_y(i)>=0 && delta_z(i)>=0
+        pai_xushu{i}='π5';
+        digit_xushu(i)=5;
+    elseif delta_x(i)<0 && delta_y(i)>=0 && delta_z(i)<0
+        pai_xushu{i}='π6';
+        digit_xushu(i)=6;
+    elseif delta_x(i)<0 && delta_y(i)<0 && delta_z(i)>=0
+        pai_xushu{i}='π7';
+        digit_xushu(i)=7;
+    else
+        pai_xushu{i}='π8';
+        digit_xushu(i)=8;
+    end
+end
+
+%丢失前clear_N个数据点
+clear_N=10000;             %%设定丢弃数据点
+x_clear=x(1:clear_N);x(1:clear_N)=[];   %%x前clear_N个数据点存入x_clear     
+y_clear=y(1:clear_N);y(1:clear_N)=[];   %%y前clear_N个数据点存入y_clear
+z_clear=z(1:clear_N);z(1:clear_N)=[];   %%z前clear_N个数据点存入z_clear
+digit_xushu_clear_N=digit_xushu(1:clear_N);digit_xushu(1:clear_N)=[];
+m=length(digit_xushu);
+
+%计算记录π模式概率p(πi)及其相应的熵值Ho
+pai_count=zeros(1,8);
+for i=1:m
+    for j=1:8
+    if digit_xushu(i) == j
+        pai_count(j)=pai_count(j)+1;   %%记录对应πi出现的个数
+    end    
+    end
+end
+
+P=pai_count/sum(pai_count);      %%获得每个πi占总体的比例
+Ho=0;
+P(find(P==0))=1;       %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+for j=1:8
+    Ho=Ho-P(j)*log2(P(j));
+end
+P(find(P==1))=0;       %%复原
+
+disp('π模式出现的概率及其对应的熵Ho');
+for i=1:8
+    if P(i)~=0
+        disp(['π' num2str(i) ' is ' num2str(P(i))]);    %%控制台上显示单个πi对应的概率
+    end
+end
+Ho
+disp('---------------------------------------------');
+
+%计算π模式的转化概率以及HT
+pai_ij_count=zeros(8,8);
+for k=1:m-1
+    for i=1:8
+        for j=1:8
+            if digit_xushu(k) == i && digit_xushu(k+1) == j    %%如果第k个π模式为πi,第k+1个π模式为πj
+                pai_ij_count(i,j)=pai_ij_count(i,j)+1;         %%则在第i行第j列+1。最后可得到转移数量矩阵。
+            end
+        end
+    end
+end
+
+P_ij=pai_ij_count/sum(sum(pai_ij_count));               %%获得每个πi->πj的转移概率
+P_ij(find(P_ij==0))=1;           %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT=0;
+for i=1:8
+    for j=1:8
+        HT=HT-P_ij(i,j)*log2(P_ij(i,j));
+    end
+end
+P_ij(find(P_ij==1))=0;     %%复原
+
+disp("π模式传递概率及相应的HT")
+for i=1:8
+    for j=1:8
+        if P_ij(i,j)~=0
+            disp(['π' num2str(i) '->' 'π' num2str(j) ' is ' num2str(P_ij(i,j))] )  %%在控制台显示πi->πj的转移概率
+        end
+    end
+end
+HT
+disp('---------------------------------------------------------------------')
+
+%去除自环后的概率及Ht
+pai_ij_count_2=pai_ij_count-diag(diag(pai_ij_count));   %%对角线置0，去除自环现象
+P_ij_2=pai_ij_count_2/sum(sum(pai_ij_count_2));         %%余下进行归一化得其转移概率
+P_ij_2(find(P_ij_2==0))=1;     %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT_2=0;
+for i=1:8
+    for j=1:8
+        HT_2=HT_2-P_ij_2(i,j)*log2(P_ij_2(i,j));
+    end
+end
+P_ij_2(find(P_ij_2==1))=0;     %%复原
+
+disp("去除自环后，π模式传递概率及相应的HT_2")
+for i=1:8
+    for j=1:8
+        if P_ij_2(i,j)~=0
+            disp(['π' num2str(i) '->' 'π' num2str(j) ' is ' num2str(P_ij_2(i,j))] ) %%在控制台显示πi->πj（i~=j）的转移概率
+        end
+    end
+end
+HT_2
+
+
+%%绘图区
+figure(1);
+n=3000;     %%短段，长度为n
+i=1:n;      %%画图所需对应x轴
+subplot(2,1,1);
+plot(i,x_clear(i),'-');hold on;plot(i,y_clear(i),'m-');hold on;plot(i,z_clear(i),'b-');hold off;
+ylabel('x,y,z');title('(a)');
+h1=legend('x','y','z');           %%设置图例
+set(h1,'Orientation','horizon');
+set(h1,'Box','off');
+
+subplot(2,1,2);
+i=1:n;
+plot(i,digit_xushu_clear_N(i),'-');
+xlabel('t');ylabel('π');title('(b)');
+  
+figure(2)
+for i=1:8
+    L(i)=length(find(digit_xushu==i));      %%得到出现πi的个数
+end
+for i=1:8
+    index(i,1:L(i))=find(digit_xushu==i);   %%πi对应在序列中的位置，方便作图
+end
+
+plot3(x(index(1,1:L(1))),y(index(1,1:L(1))),z(index(1,1:L(1))),'c*');hold on;
+plot3(x(index(2,1:L(2))),y(index(2,1:L(2))),z(index(2,1:L(2))),'r*');hold on;
+plot3(x(index(3,1:L(3))),y(index(3,1:L(3))),z(index(3,1:L(3))),'y*');hold on;
+plot3(x(index(4,1:L(4))),y(index(4,1:L(4))),z(index(4,1:L(4))),'k*');hold on;
+plot3(x(index(5,1:L(5))),y(index(5,1:L(5))),z(index(5,1:L(5))),'m*');hold on;
+plot3(x(index(6,1:L(6))),y(index(6,1:L(6))),z(index(6,1:L(6))),'b*');hold on;
+plot3(x(index(7,1:L(7))),y(index(7,1:L(7))),z(index(7,1:L(7))),'k*');hold on;
+plot3(x(index(8,1:L(8))),y(index(8,1:L(8))),z(index(8,1:L(8))),'g*');hold off;
+
+h1=legend('π_1','π2','π_3','π_4','π_5','π_6','π_8');    %%设置图例
+set(h1,'Box','off');
+
+toc
+
+%由公式4所得函数
+function f=f_dx(y,z)     %%dx/dt
+global w
+f=-w*y-z;
+end
+
+function f=f_dy(x,y)     %%dy/dt
+global w
+global a
+f=w*x+a*y;
+end
+
+function f=f_dz(x,z)     %%dz/dt
+f=0.4+z*(x-8.5);
+end

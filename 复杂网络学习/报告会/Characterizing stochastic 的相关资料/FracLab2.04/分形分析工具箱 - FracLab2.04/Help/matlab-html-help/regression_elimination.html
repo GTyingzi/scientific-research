@@ -1,0 +1,40 @@
+<html><head><title>regression_elimination (FRACLAB Functions)</title>
+<!-- $Revision$  $Date$ -->
+
+<!-- DOCNAME:FRACLAB Functions -->
+<!-- CHUNKNAME: boxdim_listepoints -->
+<!-- CHAPNAME: max -->
+<!-- HEADSTUFF -->
+<!-- SYNCHTO: fralphabeticlab.html -->
+
+<link rel=stylesheet href="docstyle1.css" type="text/css">
+</head>
+<body bgcolor=#ffffff>
+<!-- NAVBARTOP -->
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline bgcolor="#e7ebf7"><b>FRACLAB Functions</b></td>
+<td valign=baseline bgcolor="#e7ebf7" align=right><a href="P_revious"><img src="b_prev.gif" alt="Previous page" border=0></a>&nbsp;&nbsp;&nbsp;<a href="N_ext"><img src="b_next.gif" alt="Next Page" border=0></a></td>
+</tr>
+</table><font size=+3 color="#990000">regression_elimination</font>
+<p>
+Evaluation of the liminf or the limsup of the quotient yn/xn with successive eliminations
+<a name="syntax"></a><p><font size=+1 color="#990000"><b>Syntax</b></font><br class="hdr">
+<code>   [a,b]=regression_elimination(x,y,SupOuInf,Sigma,Gamma,TolNum)
+</code>
+<a name="inputs"></a><p><font size=+1 color="#990000"><b>Inputs</b></font><br class="hdr">
+<p><b><code>x</code> : </b>
+Abscissas
+</p>
+<p><b><code>y</code> : </b>
+Ordinates
+</p>
+<p><b><code>SupOuInf</code> :</b>
+'lsup' for limsup, 'linf' for liminf.
+<p><b><code>TolNum, Sigma, Gamma</code> :</b><br>The point n is eliminated if y(n)+TolNum+Sigma*sqrt(N)*n^Gamma is inferior to the value of the regression line at x(n)
+</p>
+<a name="outputs"></a><p><font size=+1 color="#990000"><b>Outputs</b></font><br class="hdr">
+</p>
+<p><b><code>a</code> :</b>Slope of the last line, evaluation of the liminf or the limsup.</p>
+<p><b><code>b</code> :</b>Value of the last line at x=0 : offset</p>
+</body>
+</html>

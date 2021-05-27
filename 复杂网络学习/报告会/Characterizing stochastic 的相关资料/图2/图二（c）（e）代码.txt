@@ -1,0 +1,109 @@
+%图二（c）(e)的实现
+clear;clc
+tic
+N=1e4;     %序列长度
+for d=2:5
+    T=d;
+ 
+    data1 = (Periodic_seq(N,T,0,1))';   %生成周期序列    
+    data2 = rand(N,1);                  %生成随机序列
+    
+    [x1,y1] = ord_net(data1,d);         %获取周期序列的序数模式以及转移矩阵
+    [x2,y2] = ord_net(data2,d);         %获取随机序列的序数模式以及转移矩阵
+    
+    k_1(d-1) = sum(sum(y1~=0))/length(unique(x1));    %获取周期序列的平均度,注意:此时存在节点的数量为length(unique(x1))
+    k_2(d-1) = sum(sum(y2~=0))/factorial(d);          %获取随机序列的平均度
+    
+    avg_L_1(d-1) = net_avg_short_weight_floyd_(y1);  %获取周期序列的平均加权最短距离
+    avg_L_2(d-1) = net_avg_short_weight_floyd_(y2);  %获取随机序列的平均加权最短距离
+end
+
+%绘图区域------------------------------------------------------------------
+d=2:5;
+figure(1)
+plot(d,k_1,'-^',d,k_2,'-o');
+xlabel('Embedding dimension,d');ylabel('Average degree,<k>');
+legend('periodic','random');
+
+figure(3)
+plot(d,avg_L_1,'-^',d,avg_L_2,'-o');
+xlabel('Embedding dimension,d');ylabel('Average weighted shortest path,<l>');
+legend('periodic','random');
+toc
+
+%调用函数区域--------------------------------------------------------------
+function avg_L= net_avg_short_weight_floyd_(a)     %a: 加权邻接矩阵
+a(find(a==0))=inf;    %将不存在的边设定为无穷大
+
+%floyed算法最短距离及其对应的路线，D对应节点间最短的距离,Path对应路径
+D=a;n=size(D,1);path=zeros(n,n);  %前期初始化，存储数据
+for i=1:n
+    for j=1:n
+        if path(i,j)~=inf
+            path(i,j)=j;
+        end
+    end
+end
+
+for k=1:n
+    for i=1:n
+        for j=1:n
+            if D(i,k)+D(k,j)<D(i,j)
+                D(i,j) = D(i,k)+D(k,j);
+                path(i,j) = path(i,k);
+            end
+        end
+    end
+end
+
+%网路指标区域，计算平均加权最短路径区域
+%介绍：这里将节点间最短距离D抽出,D中节点到自身的距离设定为0,但认定存在到自身的边
+
+for i=1:size(D,1)
+    if D(i,i)~=inf      %不存在的边不做要求，只对存在的边进行设定
+        D(i,i) = 0;    %将到自身的权值设定为0
+    end
+end
+
+D1 = D(find(D~=inf));
+avg_L = sum(D1)/length(D1);
+
+end
+function x = Periodic_seq(N,T,x_min,x_max)   %N为生成的长度,T为周期,元素大小位于[x_min,x_max]
+x=zeros(1,N);
+iter=0;
+for i=1:N
+    x(i)=x_min+iter/(T-1)*(x_max-x_min);
+    iter=iter+1;
+    if iter>=T
+        iter=iter-T;
+    end
+end
+end
+function [x,y]=ord_net(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)'
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end

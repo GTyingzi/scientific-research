@@ -1,0 +1,102 @@
+function y = lambdak(u,k);
+%   lambdak
+%   k's lambda functions for pseudoAW
+%   Paulo Goncalves
+%   June 6th 1997
+%
+%   Computes the parametrizing function lambdak defining the Affine Wigner
+%   distributions.
+%
+%   1.  Usage
+%
+%   [y] = lambdak(u,k)
+%
+%   1.1.  Input parameters
+%
+%   o  u : real vector [1,n]
+%      Argument of the function lambdak.
+%
+%   o  k : real scalar
+%      Parameter of the lambdak function. K=-1 corresponds to the
+%      Unterberger  distribution; K=0 corresponds to the  Bertrand
+%      distribution; K=0.5 corresponds to the  D-Flandrin  distribution;
+%      K=2 corresponds to the  Wigner-Ville  distribution on analytic
+%      signals.
+%
+%   1.2.  Output parameters
+%
+%   o  y : real vector [1,n]
+%      Result of the function  lambdak .
+%
+%   2.  See also:
+%
+%   pseudoAW
+%
+%   3.  Examples
+%
+%   x = linspace(-5,5,101) ;
+%   y0 = lambdak(x,-1) ;
+%   y1 = lambdak(x,2) ;
+%   plot(x,y0,x,y1) ; axis([-5 5 0 10])
+%   xlabel('time') ; title('\lambda_{k}(x) ; k = -1 ; 2') ;
+%   legend('k=-1','k=2') ;
+%
+
+% This Software is ( Copyright INRIA . 1998 1999  1 )
+% 
+% INRIA  holds all the ownership rights on the Software. 
+% The scientific community is asked to use the SOFTWARE 
+% in order to test and evaluate it.
+% 
+% INRIA freely grants the right to use modify the Software,
+% integrate it in another Software. 
+% Any use or reproduction of this Software to obtain profit or
+% for commercial ends being subject to obtaining the prior express
+% authorization of INRIA.
+% 
+% INRIA authorizes any reproduction of this Software.
+% 
+%    - in limits defined in clauses 9 and 10 of the Berne 
+%    agreement for the protection of literary and artistic works 
+%    respectively specify in their paragraphs 2 and 3 authorizing 
+%    only the reproduction and quoting of works on the condition 
+%    that :
+% 
+%    - "this reproduction does not adversely affect the normal 
+%    exploitation of the work or cause any unjustified prejudice
+%    to the legitimate interests of the author".
+% 
+%    - that the quotations given by way of illustration and/or 
+%    tuition conform to the proper uses and that it mentions 
+%    the source and name of the author if this name features 
+%    in the source",
+% 
+%    - under the condition that this file is included with 
+%    any reproduction.
+%  
+% Any commercial use made without obtaining the prior express 
+% agreement of INRIA would therefore constitute a fraudulent
+% imitation.
+% 
+% The Software beeing currently developed, INRIA is assuming no 
+% liability, and should not be responsible, in any manner or any
+% case, for any direct or indirect dammages sustained by the user.
+% 
+% Any user of the software shall notify at INRIA any comments 
+% concerning the use of the Sofware (e-mail : FracLab@inria.fr)
+% 
+% This file is part of FracLab, a Fractal Analysis Software
+
+if (k~=0) & (k~=1)
+  ind = find(u ~= 0) ;
+  y = ones(size(u)) ;
+  y(ind) = (k*(exp(-u(ind))-1)./(exp(-k*u(ind))-1)).^(1/(k-1)) ;
+elseif k==0
+  ind = find(u ~= 0) ;
+  y = ones(size(u)) ;
+  y(ind) = -u(ind)./(exp(-u(ind))-1) ;
+elseif k==1
+  ind = find(u ~= 0) ;
+  y = ones(size(u)) ;
+  y(ind) = exp(1+u(ind).*exp(-u(ind))./(exp(-u(ind))-1)) ;
+end;

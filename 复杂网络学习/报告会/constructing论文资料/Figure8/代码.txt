@@ -1,0 +1,361 @@
+%%公式（8）历时 1855.851394 秒。
+%初始数据
+clear;clc
+tic
+global w1
+global w2
+global w3
+global a
+global KL
+N=150000;h=0.01;  %迭代N次，步长h
+w1=0.98;w2=1.02;w3=1.06;a=0.165;      %振荡器w，参数a
+
+iter=1;
+for KL=0:0.001:0.1
+%四阶Runge-Kutta算法
+
+x1=zeros(1,N);y1=zeros(1,N);z1=zeros(1,N);
+x2=zeros(1,N);y2=zeros(1,N);z2=zeros(1,N);
+x3=zeros(1,N);y3=zeros(1,N);z3=zeros(1,N);
+
+x1(1)=rand;y1(1)=10*rand;z1(1)=rand;  %设定第一组初始点
+x2(1)=rand;y2(1)=10*rand;z2(1)=rand;  %设定第二组初始点
+x3(1)=rand;y3(1)=10*rand;z3(1)=rand;  %设定第三组初始点
+
+for i=1:N
+    %算k1
+    x1_k1=f_dx1(x1(i),y1(i),z1(i),x2(i));
+    y1_k1=f_dy1(x1(i),y1(i));
+    z1_k1=f_dz(x1(i),z1(i));
+    
+    x2_k1=f_dx2(x2(i),y2(i),z2(i),x1(i)+x3(i));
+    y2_k1=f_dy2(x2(i),y2(i));
+    z2_k1=f_dz(x2(i),z2(i));
+    
+    x3_k1=f_dx3(x3(i),y3(i),z3(i),x2(i));
+    y3_k1=f_dy3(x3(i),y3(i));
+    z3_k1=f_dz(x3(i),z3(i));
+    
+    %算k2
+    x1_k2=f_dx1(x1(i)+h/2*x1_k1,y1(i)+h/2*y1_k1,z1(i)+h/2*z1_k1,x2(i)+h/2*x2_k1);
+    y1_k2=f_dy1(x1(i)+h/2*x1_k1,y1(i)+h/2*y1_k1);
+    z1_k2=f_dz(x1(i)+h/2*x1_k1,z1(i)+h/2*z1_k1);
+    
+    x2_k2=f_dx2(x2(i)+h/2*x2_k1,y2(i)+h/2*y2_k1,z2(i)+h/2*z2_k1,x1(i)+h/2*x1_k1+x3(i)+h/2*x3_k1);
+    y2_k2=f_dy2(x2(i)+h/2*x2_k1,y2(i)+h/2*y2_k1);
+    z2_k2=f_dz(x2(i)+h/2*x2_k1,z2(i)+h/2*z2_k1);
+    
+    x3_k2=f_dx3(x3(i)+h/2*x3_k1,y1(i)+h/2*y3_k1,z3(i)+h/2*z3_k1,x2(i)+h/2*x2_k1);
+    y3_k2=f_dy3(x3(i)+h/2*x3_k1,y1(i)+h/2*y3_k1);
+    z3_k2=f_dz(x3(i)+h/2*x3_k1,z1(i)+h/2*z3_k1);
+    
+    %算k3
+    x1_k3=f_dx1(x1(i)+h/2*x1_k2,y1(i)+h/2*y1_k2,z1(i)+h/2*z1_k2,x2(i)+h/2*x2_k2);
+    y1_k3=f_dy1(x1(i)+h/2*x1_k2,y1(i)+h/2*y1_k2);
+    z1_k3=f_dz(x1(i)+h/2*x1_k2,z1(i)+h/2*z1_k2);
+    
+    x2_k3=f_dx2(x2(i)+h/2*x2_k2,y2(i)+h/2*y2_k2,z2(i)+h/2*z2_k2,x1(i)+h/2*x1_k2+x3(i)+h/2*x3_k2);
+    y2_k3=f_dy2(x2(i)+h/2*x2_k2,y2(i)+h/2*y2_k2);
+    z2_k3=f_dz(x2(i)+h/2*x2_k2,z2(i)+h/2*z2_k2);
+    
+    x3_k3=f_dx3(x3(i)+h/2*x3_k2,y3(i)+h/2*y3_k2,z3(i)+h/2*z3_k2,x2(i)+h/2*x2_k2);
+    y3_k3=f_dy3(x3(i)+h/2*x3_k2,y3(i)+h/2*y3_k2);
+    z3_k3=f_dz(x3(i)+h/2*x3_k2,z3(i)+h/2*z3_k2);
+    
+    %算k4
+    x1_k4=f_dx1(x1(i)+h*x1_k3,y1(i)+h*y1_k3,z1(i)+h*z1_k3,x2(i)+h/2*x2_k3);
+    y1_k4=f_dy1(x1(i)+h*x1_k3,y1(i)+h*y1_k3);
+    z1_k4=f_dz(x1(i)+h*x1_k3,z1(i)+h*z1_k3);
+    
+    x2_k4=f_dx2(x2(i)+h*x2_k3,y2(i)+h*y2_k3,z2(i)+h*z2_k3,x1(i)+h*x1_k3+x3(i)+h*x3_k3);
+    y2_k4=f_dy2(x2(i)+h*x2_k3,y2(i)+h*y2_k3);
+    z2_k4=f_dz(x2(i)+h*x2_k3,z2(i)+h*z2_k3);
+    
+    x3_k4=f_dx3(x3(i)+h*x3_k3,y3(i)+h*y3_k3,z3(i)+h*z3_k3,x2(i)+h*x2_k3);
+    y3_k4=f_dy3(x3(i)+h*x3_k3,y3(i)+h*y3_k3);
+    z3_k4=f_dz(x3(i)+h*x3_k3,z3(i)+h*z3_k3);
+    
+    %计算下一时刻
+    x1(i+1)=x1(i)+h/6*(x1_k1+2*x1_k2+2*x1_k3+x1_k4);
+    y1(i+1)=y1(i)+h/6*(y1_k1+2*y1_k2+2*y1_k3+y1_k4);
+    z1(i+1)=z1(i)+h/6*(z1_k1+2*z1_k2+2*z1_k3+z1_k4);
+    
+    x2(i+1)=x2(i)+h/6*(x2_k1+2*x2_k2+2*x2_k3+x2_k4);
+    y2(i+1)=y2(i)+h/6*(y2_k1+2*y2_k2+2*y2_k3+y2_k4);
+    z2(i+1)=z2(i)+h/6*(z2_k1+2*z2_k2+2*z2_k3+z2_k4);
+    
+    x3(i+1)=x3(i)+h/6*(x3_k1+2*x3_k2+2*x3_k3+x3_k4);
+    y3(i+1)=y3(i)+h/6*(y3_k1+2*y3_k2+2*y3_k3+y3_k4);
+    z3(i+1)=z3(i)+h/6*(z3_k1+2*z3_k2+2*z3_k3+z3_k4);
+end
+%丢弃前clear_N个数据点
+clear_N=10000;
+x1(1:clear_N)=[];x2(1:clear_N)=[];x3(1:clear_N)=[];
+y1(1:clear_N)=[];y2(1:clear_N)=[];y3(1:clear_N)=[];
+z1(1:clear_N)=[];z2(1:clear_N)=[];z3(1:clear_N)=[];
+
+%--------------------------------------------------------------------------
+delta_x1=diff(x1);delta_x2=diff(x2);delta_x3=diff(x3);    %%由题目要求，设定xk（k=1,2,3）的时间序列
+m=length(delta_x1);
+%记录π序数
+pai_xushu=cell(1,m);
+digit_xushu=zeros(1,m);
+for i=1:m            %%得到m个π序数
+    if delta_x1(i)>=0 && delta_x2(i)>=0 && delta_x3(i)>=0
+        pai_xushu{i}='π1';
+        digit_xushu(i)=1;
+    elseif delta_x1(i)>=0 && delta_x2(i)>=0 && delta_x3(i)<0
+        pai_xushu{i}='π2';
+        digit_xushu(i)=2;
+    elseif delta_x1(i)>=0 && delta_x2(i)<0 && delta_x3(i)>=0
+        pai_xushu{i}='π3';
+        digit_xushu(i)=3;
+    elseif delta_x1(i)>=0 && delta_x2(i)<0 && delta_x3(i)<0
+        pai_xushu{i}='π4';
+        digit_xushu(i)=4;
+    elseif delta_x1(i)<0 && delta_x2(i)>=0 && delta_x3(i)>=0
+        pai_xushu{i}='π5';
+        digit_xushu(i)=5;
+    elseif delta_x1(i)<0 && delta_x2(i)>=0 && delta_x3(i)<0
+        pai_xushu{i}='π6';
+        digit_xushu(i)=6;
+    elseif delta_x1(i)<0 && delta_x2(i)<0 && delta_x3(i)>=0
+        pai_xushu{i}='π7';
+        digit_xushu(i)=7;
+    else
+        pai_xushu{i}='π8';
+        digit_xushu(i)=8;
+    end
+end
+
+%--------------------------------------------------------------------------
+delta_x1=diff(x1);delta_y1=diff(y1);delta_z1=diff(z1);   %%x1,y1,z1序列,用来获取Ω1
+m=length(delta_x1);
+
+%记录π序数
+digit_xushu1=zeros(1,m);
+for i=1:m            %%得到m个π序数
+    if delta_x1(i)>=0 && delta_y1(i)>=0 && delta_z1(i)>=0
+        digit_xushu1(i)=1;
+    elseif delta_x1(i)>=0 && delta_y1(i)>=0 && delta_z1(i)<0
+        digit_xushu1(i)=2;
+    elseif delta_x1(i)>=0 && delta_y1(i)<0 && delta_z1(i)>=0
+        digit_xushu1(i)=3;
+    elseif delta_x1(i)>=0 && delta_y1(i)<0 && delta_z1(i)<0
+        digit_xushu1(i)=4;
+    elseif delta_x1(i)<0 && delta_y1(i)>=0 && delta_z1(i)>=0
+        digit_xushu1(i)=5;
+    elseif delta_x1(i)<0 && delta_y1(i)>=0 && delta_z1(i)<0
+        digit_xushu1(i)=6;
+    elseif delta_x1(i)<0 && delta_y1(i)<0 && delta_z1(i)>=0
+        digit_xushu1(i)=7;
+    else
+        digit_xushu1(i)=8;
+    end
+end
+
+%-----------------------------------------------------------------------------------------------------
+delta_x2=diff(x2);delta_y2=diff(y2);delta_z2=diff(z2);      %%x2,y2,z2序列，用来获取Ω2
+m=length(delta_x2);
+
+%记录π序数
+digit_xushu2=zeros(1,m);
+for i=1:m            %%得到m个π序数
+    if delta_x2(i)>=0 && delta_y2(i)>=0 && delta_z2(i)>=0
+        digit_xushu2(i)=1;
+    elseif delta_x2(i)>=0 && delta_y2(i)>=0 && delta_z2(i)<0
+        digit_xushu2(i)=2;
+    elseif delta_x2(i)>=0 && delta_y2(i)<0 && delta_z2(i)>=0
+        digit_xushu2(i)=3;
+    elseif delta_x2(i)>=0 && delta_y2(i)<0 && delta_z2(i)<0
+        digit_xushu2(i)=4;
+    elseif delta_x2(i)<0 && delta_y2(i)>=0 && delta_z2(i)>=0
+        digit_xushu2(i)=5;
+    elseif delta_x2(i)<0 && delta_y2(i)>=0 && delta_z2(i)<0
+        digit_xushu2(i)=6;
+    elseif delta_x2(i)<0 && delta_y2(i)<0 && delta_z2(i)>=0
+        digit_xushu2(i)=7;
+    else
+        digit_xushu2(i)=8;
+    end
+end
+
+%------------------------------------------------------------------------------------------------------
+delta_x3=diff(x3);delta_y3=diff(y3);delta_z3=diff(z3);      %%x3,y3,z3序列,用来获取Ω3
+m=length(delta_x3);
+
+%记录π序数
+digit_xushu3=zeros(1,m);
+for i=1:m            %%得到m个π序数
+    if delta_x3(i)>=0 && delta_y3(i)>=0 && delta_z3(i)>=0
+        digit_xushu3(i)=1;
+    elseif delta_x2(i)>=0 && delta_y2(i)>=0 && delta_z2(i)<0
+        digit_xushu3(i)=2;
+    elseif delta_x3(i)>=0 && delta_y3(i)<0 && delta_z3(i)>=0
+        digit_xushu3(i)=3;
+    elseif delta_x3(i)>=0 && delta_y3(i)<0 && delta_z3(i)<0
+        digit_xushu3(i)=4;
+    elseif delta_x3(i)<0 && delta_y3(i)>=0 && delta_z3(i)>=0
+        digit_xushu3(i)=5;
+    elseif delta_x3(i)<0 && delta_y3(i)>=0 && delta_z3(i)<0
+        digit_xushu3(i)=6;
+    elseif delta_x3(i)<0 && delta_y3(i)<0 && delta_z3(i)>=0
+        digit_xushu3(i)=7;
+    else
+        digit_xushu3(i)=8;
+    end
+end
+
+%----------------------------------------------------------------------------------------------------
+%计算记录π模式概率p(πi)及其相应的熵值Ho
+pai_count=zeros(1,8);
+for i=1:m
+    for j=1:8
+    if digit_xushu(i) == j
+        pai_count(j)=pai_count(j)+1;        %%记录对应πi出现的个数
+    end    
+    end
+end
+
+P(:,iter)=pai_count/sum(pai_count);          %%获得每个πi占总体的比例
+P(find(P(:,iter)==0),iter)=1;     %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+Ho(iter)=0;
+for j=1:8
+    Ho(iter)=Ho(iter)-P(j,iter)*log2(P(j,iter));
+end
+P(find(P(:,iter)==1),iter)=0;     %%复原
+
+%计算π模式的转化概率以及HT
+pai_ij_count=zeros(8,8);
+for k=1:m-1
+    for i=1:8
+        for j=1:8
+            if digit_xushu(k) == i && digit_xushu(k+1) == j    %%如果第k个π模式为πi,第k+1个π模式为πj
+                pai_ij_count(i,j)=pai_ij_count(i,j)+1;         %%则在第i行第j列+1。最后可得到转移数量矩阵。
+            end
+        end
+    end
+end
+P_ij=pai_ij_count/sum(sum(pai_ij_count));               %%获得每个πi->πj的转移概率
+P_ij(find(P_ij==0))=1;           %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT(iter)=0;
+for i=1:8
+    for j=1:8
+        HT(iter)=HT(iter)-P_ij(i,j)*log2(P_ij(i,j));
+    end
+end
+P_ij(find(P_ij==1))=0;     %%复原
+
+%去除自环后的概率及Ht
+pai_ij_count_2=pai_ij_count-diag(diag(pai_ij_count));   %%对角线置0，去除自环现象
+P_ij_2=pai_ij_count_2/sum(sum(pai_ij_count_2));         %%余下进行归一化得其转移概率
+P_ij_2(find(P_ij_2==0))=1;     %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT_2(iter)=0;
+for i=1:8
+    for j=1:8
+        HT_2(iter)=HT_2(iter)-P_ij_2(i,j)*log2(P_ij_2(i,j));
+    end
+end
+P_ij_2(find(P_ij_2==1))=0;     %%复原
+
+%------------------以下是获得Ωi------------------------
+%得Ω1
+XX1=digit_xushu1;
+YY1=hilbert(XX1);
+YY1=imag(YY1);
+z1=atan(YY1./XX1);
+Dz1=diff(z1);
+OM1(iter)=mean(Dz1)/(2*pi);
+
+%得Ω2
+XX2=digit_xushu2;
+YY2=hilbert(XX2);
+YY2=imag(YY2);
+z2=atan(YY2./XX2);
+Dz2=diff(z2);
+OM2(iter)=mean(Dz2)/(2*pi);
+
+%得Ω3
+XX3=digit_xushu3;
+YY3=hilbert(XX3);
+YY3=imag(YY3);
+z3=atan(YY3./XX3);
+Dz3=diff(z3);
+OM3(iter)=mean(Dz3)/(2*pi);
+
+iter=iter+1;
+end
+
+%%绘图区
+figure(1)
+
+mm=0:0.001:0.1;         %%画图所需对应x轴
+subplot(3,1,1);
+plot(mm,P(1,:),'b*-');hold on;
+plot(mm,P(2,:),'g*-');hold on;
+plot(mm,P(3,:),'r*-');hold on;
+plot(mm,P(4,:),'c*-');hold on;
+plot(mm,P(5,:),'m*-');hold on;
+plot(mm,P(6,:),'y*-');hold on;
+plot(mm,P(7,:),'k*-');hold on;
+plot(mm,P(8,:),'w*-');hold off;
+ylabel('f(π_i)');
+% h1=legend('π_1','π_2','π_3','π_4','π_5','π_6','π_7','π_8');
+% set(h1,'Orientation','horizon');
+% set(h1,'Box','off');
+
+subplot(3,1,2);
+[AX,H1,H2]=plotyy(mm,Ho,mm,HT,'plot');     %%设置双坐标
+HH1=get(AX(1),'Ylabel');
+set(HH1,'String','H_o');
+HH2=get(AX(2),'Ylabel');
+set(HH2,'String','H_T');
+
+subplot(3,1,3)
+plot(mm,OM1,'r');hold on;
+plot(mm,OM2,'b');hold on;
+plot(mm,OM3,'g');hold on;
+xlabel('k');ylabel('Ω_i');
+
+toc
+
+%由公式（8）所得函数
+function f=f_dx1(x,y,z,xx)    %%对dx1/dt,
+global w1
+global KL
+f=-w1*y-z+KL*(xx-x);
+end
+
+function f=f_dx3(x,y,z,xx)     %%dx3/dt
+global w3
+global KL
+f=-w3*y-z+KL*(xx-x);
+end
+
+function f=f_dx2(x,y,z,xx)       %%dx2/dt
+global w2
+global KL
+f=-w2*y-z+KL*(xx-2*x);
+end
+
+function f=f_dy1(x,y)            %%dy1/dt
+global w1
+global a
+f=w1*x+a*y;
+end
+
+function f=f_dy2(x,y)           %%dy2/dt
+global w2
+global a
+f=w2*x+a*y;
+end
+
+function f=f_dy3(x,y)           %%dy3/dt
+global w3
+global a
+f=w3*x+a*y;
+end
+
+function f=f_dz(x,z)            %%dz/dt
+f=0.4+z*(x-8.5);
+end

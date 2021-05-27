@@ -1,0 +1,9 @@
+<productinfo>
+
+<matlabrelease>14</matlabrelease>
+<name>FracLab</name>
+<type>toolbox</type>
+<icon>$toolbox/matlab/icons/matlabicon.gif</icon>
+<help_location>.</help_location>
+
+</productinfo>

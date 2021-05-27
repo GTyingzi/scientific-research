@@ -1,0 +1,64 @@
+	  CHANGELOG FOR FRACLAB
+http://www.irccyn.ec-nantes.fr/FracLab/
+=======================================
+
+2.04
+-----------------------
+- Jun, 04 2007        -
+----------------------- 
+# Fixed : 'test1' variable renamed to 'fl_test1' to avoid conflicts [fl_get_details.m]
+# Fixed : mean replaced by nanmean to avoid propagation of NaN values [exposc3.m]
+# Fixed : mean replaced by nanmean to avoid propagation of NaN values [fl_tendance.m]
+# Fixed : missing transposition for non square matrix [fl_tendance.m]
+# Fixed : warning message hidden : warning 'off' then 'on' [fl_import.m]
++ Added : new compilation > mexmaci : removed -fno-common from CFLAGS [mexopts.sh]
++ Added : new compilation > mexa64 : removed '//' comments [*.c]
++ Added : new compilation > mexw32 : compiled with Visual Studio Express 2005, some .lib files were missing [*.lib]
++ Added : all-in-one version : new folder 'Binaries' to store compiled files [/Binaries]
+# Fixed : Warning: Function beep.mexw32 has the same name as a MATLAB builtin : beep removed [beep.c]
+# Fixed : XML-file validation against schema info.xsd [info.xml]
+
+
+2.03
+-----------------------
+- Feb, 20 2006        -
+----------------------- 
+# Fixed : 'at+' option to create 'FracLab.log' file if it is missing [fl_diary.m]
+# Fixed : 'sameGaussianInputs' renamed to 'forceSameGaussianInputs' [fastfBm2D.m]
+# Fixed : Wrong number of output parameters [fl_DWTestim_compute.m] [fl_adv_DWTestim_compute.m]
+# Fiwed : One or more output arguments not assigned [DWTestim_all.m]
+# Fixed : Waitbar was not reaching 100% [estimGQV2DH.m]
+# Fixed : Missing quote [gui_fl_pseudoaw.m]
+
+
+2.02
+-----------------------
+- Feb, 9 2006         -
+----------------------- 
+# Fixed : Spelling mistake on the fisrt line of the file [fl_gwei_compute.m]
+# Fixed : Help was not displayed when pressing "Help" button [fl_boxdim_compute.m]
+@ Updated : Recompilation of all DLLs using Matlab 7R14 SP2.
+@ Updated : New behavior of the installer. No more updates Matlab path if FracLab was already installed.
+
+
+2.01
+-----------------------
+- Feb, 1 2006         -
+----------------------- 
+@ Updated : Updated code for the crossing tree and EBP routines.
+	    Improvement of the speed of the code, and the GUI of the routines.
+# Fixed : Wrong parameters order in 1D-GQV Holder estimation. [estimGQV1DH.m]   
+@ Updated : Improvement of the speed of the GQV Holder estimations. [estimGQV1DH.m] [estimGQV2DH.m]   
++ Added : New fonction to get the trend of a signal using splines. [fl_tendance.m]
+@ Updated : New default values : H(t)=t and sin(10*t) for Generalized Weierstrass. [gui_fl_gwei.m] [fl_gwei_compute.m]
+# Fixed : Default text not always displayed in Weighted least square.
+@ Updated : Post treatment in DWT and oscillation-based Holder estimation. [DWTestim_all.m] [exposc3.m]
+# Updated : The default point for "one point estimations" is no more the middle of the signal,
+            but a random value between 1 and the size of the signal.
++ Added : Ability to check for new version directly from FracLab. (misc> check for updates) [fltool.m]
+@ Updated : Continuous WT re-activated. (TF/TS> Continuous WT) [fltool.m]
+@ Updated : Speed improvement for mBm synthesis. [mBmQuantifKrigeage.m] [mBm2DQuantifKrigeage.m]
+@ Updated : Help of various m-files.
++ Added : 2D Holderian interpolation [fracinterp2d.m]
+@ Updated : New parameter 'showWaitbars' to show or hide waitbars [fracinterp.m]
++ Added : Creation of this file [changelog.txt]

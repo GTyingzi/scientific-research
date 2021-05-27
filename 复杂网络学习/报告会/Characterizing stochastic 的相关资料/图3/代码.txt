@@ -1,0 +1,59 @@
+clear;clc
+tic
+N = 1000;
+Eta = 0.01:0.01:1;
+d = 2;
+iter=1;
+while iter<1e2       %迭代100次，取均值
+x = normrnd(0,1,N,1);
+y = x;
+
+for k = 1:length(Eta)
+    eta = Eta(k);
+    p = randperm(ceil(N-eta*N)+1,1);
+    y((p+1):(p+ceil(eta*N))) = 1:ceil(eta*N);
+    [Pi_x,A] = ord_net(x,d);
+    [Pi_y,B] = ord_net(y,d);
+    
+    Delta_k(iter,k) = sum(sum(abs(A-B)))/2;
+end
+iter = iter+1;
+end
+Delta=mean(Delta_k,1);
+
+%绘图区--------------------------------------------------------------------
+loglog(Eta,Delta);
+ylabel('Edit distance \sigma')
+xlabel('\eta')
+legend(['d=' num2str(d)])
+text(0.5,0.2,['N=' num2str(N)])
+
+toc
+%调用函数区域---------------------------------------------------------------
+function [x,y]=ord_net(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)'
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end

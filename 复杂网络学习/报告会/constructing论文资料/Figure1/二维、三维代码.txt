@@ -1,0 +1,105 @@
+%% 二维时间序列模式
+clear;clc
+%初始数据
+n=10;                   %%时间序列长度为10
+m=20;                   %%大小设定为20之内
+x=m*rand(1,n);          %%随机生成长度为10的x的时间序列，大小在0~20
+y=m*rand(1,n);          %%随机生成长度为10的y的时间序列，大小在0~20
+delta_x=diff(x);        %%求x的差分，此时周期为1
+delta_y=diff(y);        %%求y的差分，此时周期为1
+m=length(delta_x);      %%获得差分长度
+%--------------------------------------------------------------------------
+%记录π序数
+pai_xushu=cell(1,m);
+for i=1:m            %%得到m个π序数
+    if delta_x(i)>=0 && delta_y(i)>=0
+        pai_xushu{i}='π1';
+    elseif delta_x(i)>=0 && delta_y(i)<0
+        pai_xushu{i}='π2';
+    elseif delta_x(i)<0 && delta_y(i)>=0
+        pai_xushu{i}='π3';
+    else
+        pai_xushu{i}='π4';
+    end
+end
+
+%绘图区
+i=1:n;      %%画生成x,y图对应需要
+j=1:n-1;    %%画差分增量模式图需要
+figure(1);
+subplot(2,1,1);
+plot(i,x,'o-');hold on;plot(i,y,'b*-');hold off;
+ylabel('x,y');
+h1=legend('x','y');                  %%设置图例
+set(h1,'Orientation','horizon');     
+set(h1,'Box','off');
+
+subplot(2,1,2);
+plot(j,delta_x,'o-');hold on;plot(j,delta_y,'b*-');hold off;
+line([0,n],[0,0],'linestyle','--');   %%添加横坐标0-n，纵坐标0-0的虚线
+for i=1:n-1
+    text(i,0,pai_xushu(i));           %%显示对应结果的π模式
+end
+xlabel('t');
+ylabel('Δx,Δy');
+h2=legend('Δx','Δy');               %%设置图例
+set(h2,'Orientation','horizon');
+set(h2,'Box','off');
+
+%%  三维时间序列
+clear;clc
+%初始数据
+n=10;             %%时间序列长度为10
+m=20;             %%大小设定为20之内
+x=m*rand(1,n);    %%随机生成长度为10的x的时间序列，大小在0~20
+y=m*rand(1,n);    %%随机生成长度为10的y的时间序列，大小在0~20
+z=m*rand(1,n);    %%随机生成长度为10的z的时间序列，大小在0~20
+delta_x=diff(x);  %%求x的差分
+delta_y=diff(y);  %%求y的差分
+delta_z=diff(z);  %%求z的差分
+m=length(delta_x);
+
+%记录π序数
+pai_xushu=cell(1,m);
+for i=1:m                    %%得到n-1个π序数
+    if delta_x(i)>=0 && delta_y(i)>=0 && delta_z(i)>=0
+        pai_xushu{i}='π1';
+    elseif delta_x(i)>=0 && delta_y(i)>=0 && delta_z(i)<0
+        pai_xushu{i}='π2';
+    elseif delta_x(i)>=0 && delta_y(i)<0 && delta_z(i)>=0
+        pai_xushu{i}='π3';
+    elseif delta_x(i)>=0 && delta_y(i)<0 && delta_z(i)<0
+        pai_xushu{i}='π4';
+    elseif delta_x(i)<0 && delta_y(i)>=0 && delta_z(i)>=0
+        pai_xushu{i}='π5';
+    elseif delta_x(i)<0 && delta_y(i)>=0 && delta_z(i)<0
+        pai_xushu{i}='π6';
+    elseif delta_x(i)<0 && delta_y(i)<0 && delta_z(i)>=0
+        pai_xushu{i}='π7';
+    else
+        pai_xushu{i}='π8';
+    end
+end
+
+%绘图区
+i=1:n;          %%画生成x,y图对应需要
+j=1:n-1;        %%画差分增量模式图需要
+figure(1);
+subplot(2,1,1);
+plot(i,x,'o-');hold on;plot(i,y,'b*-');hold on;plot(i,z,'m^-');hold off;
+ylabel('x,y,z');
+h1=legend('x','y','z');        %%设置图例
+set(h1,'Orientation','horizon');
+set(h1,'Box','off');
+
+subplot(2,1,2);
+plot(j,delta_x,'o-');hold on;plot(j,delta_y,'b*-');hold on;plot(j,delta_z,'m^-');hold off;
+line([0,n],[0,0],'linestyle','--');   %%添加横坐标0-n，纵坐标0-0的虚线
+for i=1:n-1
+    text(i,0,pai_xushu(i));           %%显示对应结果的π模式
+end
+xlabel('t');
+ylabel('Δx,Δy,Δz');
+h2=legend('Δx','Δy','Δz');         %%设置图例
+set(h2,'Orientation','horizon');
+set(h2,'Box','off')

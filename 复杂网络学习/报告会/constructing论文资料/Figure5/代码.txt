@@ -1,0 +1,143 @@
+%初始数据
+clear;clc
+n=30;                      %%设定时间序列长度
+x=zeros(1,n);y=zeros(1,n);
+x(1)=0.76;y(1)=0;           %%设定初值
+
+for i=2:n                   %%迭代得到完整的序列值
+    x(i)=y(i-1)+1-1.4*x(i-1)^2;
+    y(i)=0.3*x(i-1);
+end
+
+delta_x=diff(x);          %%求x的差分
+delta_y=diff(y);          %%求y的差分
+m=length(delta_x);        %%获取差分长度
+
+%记录π序数
+pai_xushu=cell(1,m);       %%直观显示对应的π模式
+digit_xushu=zeros(1,m);    %%编程序简易，以1->π1,2->π2，…，n->πn
+for i=1:m                  %%得到m个π序数
+    if delta_x(i)>=0 && delta_y(i)>=0
+        pai_xushu{i}='π1';
+        digit_xushu(i)=1;
+    elseif delta_x(i)>=0 && delta_y(i)<0
+        pai_xushu{i}='π2';
+        digit_xushu(i)=2;
+    elseif delta_x(i)<0 && delta_y(i)>=0
+        pai_xushu{i}='π3';
+        digit_xushu(i)=3;
+    else
+        pai_xushu{i}='π4';
+        digit_xushu(i)=4;
+    end
+end
+
+pai_count=zeros(1,4);
+for i=1:m
+    for j=1:4
+    if digit_xushu(i)==j
+        pai_count(j)=pai_count(j)+1;    %%记录对应πi出现的个数
+    end    
+    end
+end
+
+P=pai_count/sum(pai_count);             %%获得每个πi占总体的比例
+Ho=0;
+P(find(P==0))=1;     %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+for j=1:4
+    Ho=Ho-P(j)*log2(P(j));
+end
+P(find(P==1))=0;     %%复原
+
+%计算π模式转移概率
+pai_ij_count=zeros(4,4);
+for k=1:m-1
+    for i=1:4
+        for j=1:4
+            if digit_xushu(k) == i && digit_xushu(k+1) == j    %%如果第k个π模式为πi,第k+1个π模式为πj
+                pai_ij_count(i,j)=pai_ij_count(i,j)+1;         %%则在i行j列+1。最后可得到转移数量矩阵。
+            end
+        end
+    end
+end
+
+P_ij=pai_ij_count/sum(sum(pai_ij_count));  %%获得每个πi->πj的转移概率    
+P_ij(find(P_ij==0))=1;           %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT=0;
+for i=1:4
+    for j=1:4
+        HT=HT-P_ij(i,j)*log2(P_ij(i,j));
+    end
+end
+P_ij(find(P_ij==1))=0;     %%复原
+disp("未去除自环时的概率矩阵P_ij及相应的HT")
+P_ij,HT
+
+for i=1:4
+    for j=1:4
+        if P_ij(i,j)~=0
+            disp(['π' num2str(i) '->' 'π' num2str(j) ' is ' num2str(P_ij(i,j))] )  %%在控制台显示
+        end
+    end
+end
+disp('---------------------------------------------------------------------')
+
+%去除自环后的概率pai_ij_count_2及Ht_2
+pai_ij_count_2=pai_ij_count-diag(diag(pai_ij_count));   %%对角线置0，去除自环现象
+P_ij_2=pai_ij_count_2/sum(sum(pai_ij_count_2));         %%余下进行归一化得其转移概率
+P_ij_2(find(P_ij_2==0))=1;        %%消除概率为0取歧义对数的情况，log2(1)=0,不影响最后熵值结果
+HT_2=0;
+for i=1:4
+    for j=1:4
+        HT_2=HT_2-P_ij_2(i,j)*log2(P_ij_2(i,j));
+    end
+end
+P_ij_2(find(P_ij_2==1))=0;     %复原
+disp("去除自环时的概率矩阵P_ij_2及相应的HT_2")
+P_ij_2,HT_2
+
+for i=1:4
+    for j=1:4
+        if P_ij_2(i,j)~=0
+            disp(['π' num2str(i) '->' 'π' num2str(j) ' is ' num2str(P_ij_2(i,j))] )  %%在控制台显示
+        end
+    end
+end
+
+%%绘图区
+
+figure(1);
+%图a
+subplot(2,2,1);
+x1=-1.5:0.01:1.5;y1=1.4*x1.^2+x1-1;          %%L1
+x2=-1.5:0.01:1.5;y2=0.3*x2;                  %%L2
+plot(x1,y1,'m-');hold on;plot(x2,y2,'m-');hold on;
+xlabel('x');ylabel('y');
+title('(a)')
+
+for i=1:4
+    L(i)=length(find(digit_xushu==i));
+end
+for i=1:4
+    index(i,1:L(i))=find(digit_xushu==i);
+end
+
+plot(x(index(1,1:L(1))),y(index(1,1:L(1))),'b*');hold on;plot(x(index(2,1:L(2))),y(index(2,1:L(2))),'r*');hold on;
+plot(x(index(3,1:L(3))),y(index(3,1:L(3))),'*');hold on;plot(x(index(4,1:L(4))),y(index(4,1:L(4))),'m*');hold off;
+
+%图b
+subplot(2,2,2);
+i=1:n;      %%画生成x、y对应的图需x轴
+plot(i,x,'-');hold on;plot(i,y,'m-');hold on;hold off;
+xlabel('t');ylabel('x,y');
+title('b');
+h1=legend('x','y');              %%设置图例格式
+set(h1,'Orientation','horizon');
+set(h1,'Box','off');
+
+%图c
+subplot(2,2,3);
+bar(P);
+xlabel('π_i');ylabel('p(π_i)');
+title('c');
+text(3.3,0.3,['H_o=' num2str(Ho)]);      %%在图形对应位置上显示H_o

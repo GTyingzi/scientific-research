@@ -1,0 +1,197 @@
+<html><head><title>monolr (FRACLAB Functions)</title>
+<!-- $Revision$  $Date$ -->
+
+<!-- DOCNAME:FRACLAB Functions -->
+<!-- CHUNKNAME: boxdim_classique -->
+<!-- CHAPNAME: boxdim_classique -->
+<!-- HEADSTUFF -->
+<!-- SYNCHTO: fralphabeticlab.html -->
+
+<link rel=stylesheet href="docstyle1.css" type="text/css">
+</head>
+<body bgcolor=#ffffff>
+<a name="gui_help_boxdim"></a>
+<!-- NAVBARTOP -->
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline bgcolor="#e7ebf7"><b>FRACLAB Functions</b></td>
+<td valign=baseline bgcolor="#e7ebf7" align=right><a href="P_revious"><img src="b_prev.gif" alt="Previous page" border=0></a>&nbsp;&nbsp;&nbsp;<a href="N_ext"><img src="b_next.gif" alt="Next Page" border=0></a></td>
+</tr>
+</table><font size=+3 color="#990000">lepskiiap</font>
+<p> lepskii adaptive procedure</p><p>
+    Christophe Canus<br>
+    March 9, 1998<br>
+ </p><p>
+    This C_LAB  routine is an   implementation of  the Lepskii's  adaptive
+    procedure. This algorithm  selects the "best" estimator which balances
+    the  bias-variance tradeoff  in  a   sequence  of  noisy and    biased
+    estimators theta_hat_j of a  non-random parameter theta with the
+    assumption that when  j increases, bias b_j increases as variance
+    sigma2_j decreases.
+</p>
+<a name="syntax"></a><p><font size=+1 color="#990000"><b>Syntax</b></font><br class="hdr">
+<code>    [K_star,j_hat,I_c_j_min,I_c_j_max,E_c_j_hat_min,E_c_j_hat_max]=
+    lepskiiap(theta_hat_j,[sigma2_j,K])
+</code>
+<a name="inputs"></a><p><font size=+1 color="#990000"><b>Inputs</b></font><br class="hdr">
+<p><b><code>theta_hat_j</code></b> : 
+<br>real vector [1,J] or [J,1]. Contains the sequence of estimators.</p>
+<p><b><code>sigma2_j</code> : </b>
+<br>strictly positive real vector [1,J] or [J,1]. Contains the sequence of variances</p>
+<p><b><code>K</code> :</b>
+<br> strictly positive real scalar. Contains the confidence constant.
+<a name="outputs"></a><p><font size=+1 color="#990000"><b>Outputs</b></font><br class="hdr">
+<p><b><code>K_star</code> :</b><br> strictly positive real scalar. Contains the optimal confidence constant.</p>
+<p><b><code>j_hat</code> :</b><br> strictly positive real (integer) scalar. Contains the selected index.</p>
+<p><b><code>I_c_j_min</code> :</b><br> real vector [1,J]. Contains the minimum bounds of the confidence intervals. </p>
+<p><b><code>I_c_j_max </code> :</b><br>real vector [1,J]. Contains the maximum bounds of the confidence intervals.</p>
+<p><b><code>E_c_j_hat_min</code> :</b><br>real scalar. Contains the minimum bound of the selected intersection interval.</p>
+<p><b><code>E_c_j_hat_max</code> :</b><br> real scalar. Contains the maximum bound of the selected intersection interval.</p>
+<a name="description"></a><p><font size=+1 color="#990000"><b>Description</b></font><br class="hdr">
+</p>
+<p><b>Parameters</b></p>
+<p>
+The sequence of  variances   sigma_j must be   stricly  positive,
+decreasing  when     j increases and  of    the   same  size than
+theta_hat_j.  When no sequence of variances  is given as input or when
+it is uniformly equal to  0, the algorithm computes the sequence of
+variances as sigma2_j=1./j.   The default value for epsilon is
+1./[1:J].
+</p><p>
+The confidence constant K must be >=1.
+ </p><p>
+ For the meaning of the ouput parameters, see next section.
+ </p>
+<p><b>Algorithm details</b></p>
+<p>
+Define the sequence of confidence intervals
+I_c_j=[theta_hat_j-K*sigma_j,theta_hat_j+K*sigma_j], the  sequence  of
+their   decreasing  intersections   E_c_j  and j_hat as the largest
+index j such as  that E_c_j is non void.   The best  estimator  with
+respect  to the Lepskii's  adaptive procedure is selected as
+theta_hat_j_hat in E_c_j_hat.
+ </p><p>
+The  two parameters  to be   handled are  the   sequence of  variances
+sigma2_j and the confidence constant K. sigma2_j can be any sequence
+dominating  the  estimator variance. Choosing  a  smaller K speeds up
+the selection and results to smaller j_hat.
+</p>
+<a name="examples"></a><p><font size=+1 color="#990000"><b>Example</b></font><br class="hdr">
+<code>
+T=33;<br>
+% linear model<br>
+f_t=linspace(0,1,T);<br>
+% jump for t=floor(3/4*T)<br>
+f_t(floor(3/4*T):T)=2*f_t(floor(3/4*T):T);<br>
+% Wiener process<br>
+W_t=randn(1,T);<br>
+sigma=.1;<br>
+Y_t=f_t+sigma*W_t;<br>
+subplot(2,1,1);<br>
+plot(f_t);hold on;plot(Y_t);<br>
+title('White noise model Y(t)');<br>
+xlabel('index: t');<br>
+ylabel('Y(t)=f(t)+\sigma W(t)');<br>
+% estimation for t=t_0=floor(T/2)<br>
+t_0=floor(T/2)+1;<br>
+Y_t=f_t+sigma*W_t;<br>
+for t=1:floor(T/2)<br>
+     f_hat_t(t)=mean(Y_t(t_0-t:t_0+t));<br>
+end<br>
+% Lespkii's adaptive procedure<br>
+[K_star,t_hat,I_c_t_min,I_c_t_max,E_c_t_hat_min,E_c_t_hat_max]=lepskiiap(f_hat_t,.005*1./[1:floor(T/2)],2);<br>
+% plot and disp results<br>
+plot(t_0,Y_t(t_0),'k*');<br>
+plot(t_0-t_hat,Y_t(t_0-t_hat),'kd');<br>
+plot(t_0+t_hat,Y_t(t_0+t_hat),'kd');<br>
+subplot(2,1,2);<br>
+plot(f_hat_t);<br>
+hold on;<br>
+plot(I_c_t_max,'r^');<br>
+plot(I_c_t_min,'gV');<br>
+title(['estimator \theta_t(t_0) vs. index t with t_0=',num2str(floor(T/2)+1)]);<br>
+xlabel('index: t');<br>
+ylabel('estimator: \theta_t(t_0)');<br>
+plot(t_hat,E_c_t_hat_min,'ko');<br>
+plot(t_hat,E_c_t_hat_max,'ko');<br>
+disp(['linear estimation of f_t for t=t_0=',num2str(t_0)]);    T=33;<br>
+% linear model<br>
+f_t=linspace(0,1,T);<br>
+% jump for t=floor(3/4*T)<br>
+f_t(floor(3/4*T):T)=2*f_t(floor(3/4*T):T);<br>
+% Wiener process<br>
+W_t=randn(1,T);<br>
+sigma=.1;<br>
+Y_t=f_t+sigma*W_t;<br>
+subplot(2,1,1);<br>
+plot(f_t);hold on;plot(Y_t);<br>
+title('White noise model Y(t)');<br>
+xlabel('index: t');<br>
+ylabel('Y(t)=f(t)+\sigma W(t)');<br>
+% estimation for t=t_0=floor(T/2)<br>
+t_0=floor(T/2)+1;<br>
+Y_t=f_t+sigma*W_t;<br>
+for t=1:floor(T/2)<br>
+  f_hat_t(t)=mean(Y_t(t_0-t:t_0+t));<br>
+end<br>
+% Lespkii's adaptive procedure<br>
+[K_star,t_hat,I_c_t_min,I_c_t_max,E_c_t_hat_min,E_c_t_hat_max]=lepskiiap(f_hat_t,.005*1./[1:floor(T/2)],2);<br>
+% plot and disp results<br>
+plot(t_0,Y_t(t_0),'k*');<br>
+plot(t_0-t_hat,Y_t(t_0-t_hat),'kd');<br>
+plot(t_0+t_hat,Y_t(t_0+t_hat),'kd');<br>
+subplot(2,1,2);<br>
+plot(f_hat_t);<br>
+hold on;<br>
+plot(I_c_t_max,'r^');<br>
+plot(I_c_t_min,'gV');<br>
+title(['estimator \theta_t(t_0) vs. index t with t_0=',num2str(floor(T/2)+1)]);<br>
+xlabel('index: t');<br>
+ylabel('estimator: \theta_t(t_0)');<br>
+plot(t_hat,E_c_t_hat_min,'ko');<br>
+plot(t_hat,E_c_t_hat_max,'ko');<br>
+disp(['linear estimation of f_t for t=t_0=',num2str(t_0)]);<br>
+disp(['selected index t=',num2str(t_hat)]);<br>
+disp(['estimated f_t_0 in [',num2str(E_c_t_hat_min),',',num2str(E_c_t_hat_min),']']);    T=33;<br>
+% linear model<br>
+f_t=linspace(0,1,T);<br>
+% jump for t=floor(3/4*T)<br>
+f_t(floor(3/4*T):T)=2*f_t(floor(3/4*T):T);<br>
+% Wiener process<br>
+W_t=randn(1,T);<br>
+sigma=.1;<br>
+Y_t=f_t+sigma*W_t;<br>
+subplot(2,1,1);<br>
+plot(f_t);hold on;plot(Y_t);<br>
+title('White noise model Y(t)');<br>
+xlabel('index: t');<br>
+ylabel('Y(t)=f(t)+\sigma W(t)');<br>
+% estimation for t=t_0=floor(T/2)<br>
+t_0=floor(T/2)+1;<br>
+Y_t=f_t+sigma*W_t;<br>
+for t=1:floor(T/2)<br>
+  f_hat_t(t)=mean(Y_t(t_0-t:t_0+t));<br>
+end<br>
+% Lespkii's adaptive procedure<br> [K_star,t_hat,I_c_t_min,I_c_t_max,E_c_t_hat_min,E_c_t_hat_max]=lepskiiap(f_hat_t,.005*1./[1:floor(T/2)],2);<br>
+% plot and disp results<br>
+plot(t_0,Y_t(t_0),'k*');<br>
+plot(t_0-t_hat,Y_t(t_0-t_hat),'kd');<br>
+plot(t_0+t_hat,Y_t(t_0+t_hat),'kd');<br>
+subplot(2,1,2);<br>
+plot(f_hat_t);<br>
+hold on;<br>
+plot(I_c_t_max,'r^');<br>
+plot(I_c_t_min,'gV');<br>
+title(['estimator \theta_t(t_0) vs. index t with t_0=',num2str(floor(T/2)+1)]);<br>
+xlabel('index: t');<br>
+ylabel('estimator: \theta_t(t_0)');<br>
+plot(t_hat,E_c_t_hat_min,'ko');<br>
+plot(t_hat,E_c_t_hat_max,'ko');<br>
+disp(['linear estimation of f_t for t=t_0=',num2str(t_0)]);<br>
+disp(['selected index t=',num2str(t_hat)]);<br>
+disp(['estimated f_t_0 in [',num2str(E_c_t_hat_min),',',num2str(E_c_t_hat_min),']']);<br>
+disp(['selected index t=',num2str(t_hat)]);<br>
+disp(['estimated f_t_0 in [',num2str(E_c_t_hat_min),',',num2str(E_c_t_hat_min),']']);</code></p>
+<p><font size=+1 color="#990000"><b>See Also</b></font><br class="hdr">
+<code><a href="monolr.html">monolr</a></code>(C_LAB routine)
+</body>
+</html>

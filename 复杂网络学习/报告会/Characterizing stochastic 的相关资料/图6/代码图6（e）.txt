@@ -1,0 +1,100 @@
+%图6（e）
+clear;clc
+tic
+%历时 16.768114 秒。
+addpath(genpath('G:\R2019b\bin\FracLab2.04\分形分析工具箱 - FracLab2.04\Programs'));
+N = 1024;
+
+iter=1;
+while iter<1e2
+    for i=1:9
+        H=i*0.1;
+        fbm = fBmWoodChan(N,H);
+        d_2= 2;d_3=3;
+        %对时间序列进行处理
+        [x2,y2]=ord_net(fbm,d_2);
+        [x3,y3]=ord_net(fbm,d_3);
+        
+        %计算加权最短路径距离
+        avg_L_2(iter,i) = net_avg_short_weight_floyd_(y2);
+        avg_L_3(iter,i) = net_avg_short_weight_floyd_(y3);
+    end
+    iter=iter+1;
+end
+avg_2 = mean(avg_L_2,1);
+avg_3 = mean(avg_L_3,1);
+
+H=0.1:0.1:0.9;
+%画图区域-------------------------------------------------------------------
+figure(1)
+plot(H,avg_2,'-o',H,avg_3,'-^');
+xlabel('Hurst exponent,h');ylabel('Average weighted shortest path,<l>');
+legend(['d=' num2str(d_2)],['d=' num2str(d_3)]);
+toc
+
+%调用函数区域---------------------------------------------------------------
+%floyed算法求解最短加权路径
+function avg_L= net_avg_short_weight_floyd_(a)     %a: 加权邻接矩阵
+a(find(a==0))=inf;    %将不存在的边设定为无穷大
+
+%floyed算法最短距离及其对应的路线，D对应节点间最短的距离,Path对应路径
+D=a;n=size(D,1);path=zeros(n,n);  %前期初始化，存储数据
+for i=1:n
+    for j=1:n
+        if path(i,j)~=inf
+            path(i,j)=j;
+        end
+    end
+end
+
+for k=1:n
+    for i=1:n
+        for j=1:n
+            if D(i,k)+D(k,j)<D(i,j)
+                D(i,j) = D(i,k)+D(k,j);
+                path(i,j) = path(i,k);
+            end
+        end
+    end
+end
+
+%网路指标区域，计算平均加权最短路径区域
+%介绍：这里将节点间最短距离D抽出,D中节点到自身的距离设定为0,但认定存在到自身的边
+
+for i=1:size(D,1)
+    if D(i,i)~=inf      %不存在的边不做要求，只对存在的边进行设定
+        D(i,i) = 0;    %将到自身的权值设定为0
+    end
+end
+
+D1 = D(find(D~=inf));
+avg_L = sum(D1)/length(D1);
+
+end
+function [x,y]=ord_net(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)'
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end

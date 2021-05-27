@@ -1,0 +1,98 @@
+clear;clc
+N=10^4;T=3;d=T;
+x=Periodic_seq(N,T,0,1);     %锯齿形 周期序列,长度为N,周期为T,该周期内最大值为0,最小值为1
+i=1;
+for SNR=0:0.05:2   %信噪比
+    [SNR_noise_1,y]=add_SNR(x,SNR);   %输入时间序列以及信噪比,返回添加的噪声以及加完噪声后的序列
+    [xs,paili]=ord_net(y,d);            %输入：时间序列y,嵌入维度d,输出：序数模式xs,转移概率矩阵pailie
+    H(i) = Per_entro(xs);                   %输入序数模式，返回排列熵
+    H_GN(i) = Global_node_entro(paili);    %输入转移概率矩阵，返回全局节点熵
+    i = i+1;
+end
+H=H/log2(factorial(d));          %最大值标准化
+H_GN=H_GN/(log2(d+1)-2/(d+1));   %全局节点熵的标准化
+
+%绘图区域-------------------------------------------------------------------
+SNR=0:0.05:2;
+plot(SNR,H,'go');hold on;
+plot(SNR,H_GN,'r^');hold off;
+xlabel('Signal-to-noise ratio,SNR');
+ylabel('Entropy');
+legend('H','H_{GN}');
+text(1.5,0.8,['d=' num2str(d)]);
+
+%调用函数区域--------------------------------------------------------------
+%标准排列熵
+function H = Per_entro(x)    %x是序数模式序列
+value=tabulate(x);
+value_3=value(:,3)/100;
+m=length(value_3);
+H=0;
+for i=1:m
+    if value_3(i)~=0
+        H=H-value_3(i)*log2(value_3(i));
+    end
+end
+end
+%全局节点熵 
+function H_GN = Global_node_entro(y)    %y为转移概率矩阵
+[m n]=size(y);
+p=y./sum(y,2);
+h=zeros(m,1);
+for i=1:m
+    for j=1:n
+        if y(i,j)~=0
+            h(i)=h(i)-p(i,j)*log2(p(i,j));
+        end
+    end
+end
+H_GN=sum(y)*h;
+end
+%SNR_noise为添加的噪声,y返回得到加完噪声后的序列
+function [SNR_noise,y]=add_SNR(data,SNR)  %data为原始时间序列，SNR为信躁比
+noise=randn(size(data));
+noise=noise-mean(noise);
+signal_power=1/length(data)*sum(data.*data);
+noise_variance=signal_power/(10^(SNR/10));
+SNR_noise=sqrt(noise_variance)/std(noise)*noise;
+y=data+SNR_noise;
+end
+%输入时间序列以及维数，返回π模式及对应的π模式转移矩阵
+function [x,y]=ord_net(data,d)
+n=length(data);
+pailie=perms(1:d);       %生成排列方式
+n_k=size(pailie,1);      %获取排列方式的个数
+
+for i=1:n-d+1
+    for k=1:n_k
+        [~,id]=sort(data(i:i+d-1));
+        if id==pailie(k,:)
+            x(i)=k;
+        end
+    end
+end
+
+fac=factorial(d);
+y=zeros(fac,fac);
+for k=1:length(x)-1
+    for i=1:fac
+        for j=1:fac
+            if x(k)==i &&x(k+1)==j
+                y(i,j)=y(i,j)+1;
+            end
+        end
+    end
+end
+y=y/sum(sum(y));
+end  
+function x = Periodic_seq(N,T,x_min,x_max)   %N为生成的长度,d为周期,元素大小位于[x_min,x_max]
+x=zeros(1,N);
+iter=0;
+for i=1:N
+    x(i)=x_min+iter/(T-1)*(x_max-x_min);
+    iter=iter+1;
+    if iter>=T
+        iter=iter-T;
+    end
+end
+end
